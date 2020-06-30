@@ -1,0 +1,105 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+#define n 5
+int keyboard_fill_array(int(*A)[n]) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("A[%d][%d]=", i, j);
+            scanf("%d", &A[i][j]);
+        }
+    }
+    return **A;
+}
+int file_fill_array(int(*A)[n]) {
+    FILE* f;
+    f = fopen("f.txt", "r");
+    if (f != NULL) {
+        for (int i = 0;i < n;i++)
+            for (int j = 0;j < n;j++)
+                fscanf(f, "%d", &A[i][j]);
+        fclose(f);
+    }
+    else
+        printf("Ошибка открытия файла");
+    return **A;
+}
+int check(int(*A)[n], int i) {
+    int counter = 0;
+    for (int j = 0;j < n;j++)
+        if (A[i][j] > 0)
+            counter++;
+    return counter;
+}
+int progression(int(*A)[n], int i) {
+    int a, b, j, res;
+    j = 0;
+    if (i < n) {
+        a = A[j][i + 1] - A[j][i];
+        b = A[j][i + 2] - A[j][i + 1];
+        if ((a == b) && (A[j][i + 1] != A[j][i]))
+            res = progression(A, i + 1);
+        else
+            return 0;
+    }
+    return 1;
+}
+int decision(int A[][n], int x[], int (*pfunc)(int(*)[n])) {
+    pfunc(A);
+    for (int i = 0;i < n;i++) {
+        if (check(A, i) == n)
+            x[i] = 1;
+        else
+            x[i] = -1;
+    }
+    return *x;
+}
+void output(int A[][n], int x[]) {
+    FILE* f;
+    system("cls");
+    for (int i = 0;i < n;i++) {
+        for (int j = 0;j < n;j++) {
+            printf("A[%d][%d]=%d ", i, j, A[i][j]);
+        }
+        printf("\n");
+    }
+    for (int i = 0;i < n;i++)
+        printf("\nx[%d]=%d", i, x[i]);
+    printf("\ny=%d", progression(A, 0));
+    f = fopen("out.txt", "w");
+    if (f != NULL) {
+        for (int i = 0;i < n;i++) {
+            for (int j = 0;j < n;j++) {
+                fprintf(f, "A[%d][%d]=%d ", i, j, A[i][j]);
+            }
+            printf("\n");
+        }
+
+        for (int i = 0;i < n;i++)
+            fprintf(f, "\nx[%d]=%d", i, x[i]);
+        fprintf(f, "\ny=%d", progression(A, 0));
+    }
+    else
+        printf("Ошибка открытия файла");
+}
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    int A[n][n], x[n], num;
+    int (*pfunc)(int(*)[n]) = NULL;
+    do {
+        printf("Введите 1 - чтобы ввести значения с клавиатуры и 2 - чтобы взять значения из файла\n");
+        scanf("%d", &num);
+    } while (num != 1 && num != 2);
+    switch (num) {
+    case 1:
+        pfunc = keyboard_fill_array;
+        break;
+    case 2:
+        pfunc = file_fill_array;
+        break;
+    }
+    decision(A, x, *pfunc);
+    output(A, x);
+}
