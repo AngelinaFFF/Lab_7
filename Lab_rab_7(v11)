@@ -28,7 +28,7 @@ int file_fill_array(int(*A)[n]) {
 int check(int(*A)[n], int i) {
     int counter = 0;
     for (int j = 0;j < n;j++)
-        if (A[i][j] > 0)
+        if (A[i][j] >= 0)
             counter++;
     return counter;
 }
